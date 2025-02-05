@@ -1,0 +1,110 @@
+%thomas
+n = 5;
+a = [0; -1; -1; -1; -1];
+b = [2; 2; 2; 2; 2; 2];
+c = [-1; -1; -1; -1; 0];
+d = [1; 2; 2; 2; 1];
+%Forward
+for i = 2:n
+    factor = a(i)/ b(i-1);
+    b(i) = b(i) - factor * c(i-1);
+    d(i) = d(i) - factor * d(i-1);
+end
+%Backward
+x = zeros(n, 1);
+x(n) = d(n) / b(n);
+for i = n-1: -1: 1
+    x(i) = (d(i) - c(i) * x(i+1)) / b(i);
+end
+disp(x)
+
+%svd
+A = [4 0; 3 -5];
+AAT = A * A';
+[U, D] = eig(AAT);
+singular_values = sqrt(diag(D));
+Sigma = diag(singular_values);
+sizeU = size(U);
+n = sizeU(1);
+for i = 1:n
+    V(:, i) = (A' * U(:, i)) / Sigma(i, i);
+end
+disp(U)
+disp(Sigma)
+disp(V)
+recon = U*Sigma*V;
+disp(recon)
+
+%qr
+A = [1 -1 4; 1 4 -2; 1 4 2; 1 -1 0]; 
+[m, n] = size(A); 
+Q = zeros(m, n); 
+R = zeros(n, n);
+for j = 1:n 
+    v = A(:, j); 
+    for i = 1:j-1 
+        R(i, j) = Q(:, i)' * v; 
+        v = v - R(i, j) * Q(:, i);
+    end 
+    R(j, j) = norm(v); 
+    Q(:, j) = v / R(j, j); 
+end  
+disp(Q); 
+disp(R); 
+
+%power
+A = [2 -1 0;-1 2 -1; 0 -1 2]; 
+x = ones(size(A,1),1); 
+tol = 1e-6; 
+maxIter = 100; 
+old_val = 0; 
+for i = 1:maxIter 
+    y = A*x ;
+    new_val = max(abs(y)); 
+    x = y/new_val; 
+    if abs(new_val-old_val)<tol 
+        break; 
+    end 
+    old_val = new_val; 
+end 
+fprintf(new_val) 
+disp(x) 
+
+%gso
+A = [1 1 1; 1 0 -1; 1 -1 1]; 
+    [m, n] = size(A);
+    Q = zeros(m, n);      
+for j = 1:n 
+    v = A(:, j);         
+    for i = 1:j-1 
+        v = v - (Q(:, i)' * A(:, j)) * Q(:, i); 
+    end        
+    Q(:, j) = v / norm(v); 
+end  
+disp(Q); 
+
+%gauss
+A = [2 1 1; 3 5 2; 2 1 4];
+B = [5; 15; 8];  
+X = zeros(size(B)); 
+n = length(B); 
+tolerance = 1e-6; 
+max_iterations = 100; 
+for k = 1:max_iterations 
+    X_old = X;  
+    for i = 1:n 
+        sum1 = A(i, 1:i-1) * X(1:i-1);
+        sum2 = A(i, i+1:n) * X_old(i+1:n);         
+        X(i) = (B(i) - sum1 - sum2) / A(i, i); 
+    end      
+    if norm(X - X_old, inf) < tolerance 
+        fprintf('Converged in %d iterations.\n', k); 
+        break; 
+    end 
+end  
+if k == max_iterations 
+    fprintf('Did not converge within the maximum number of iterations.\n'); 
+else 
+    fprintf('Solution:\n'); 
+    disp(X); 
+end 
